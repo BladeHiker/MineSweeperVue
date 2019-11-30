@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+    <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue/2.2.2/vue.min.js"></script>
+    <title>MineSweeper</title>
+    <style>
+        .title_ani {
+            -webkit-animation: in_t0 1s ease-in-out;
+            animation: in_t0 1s ease-in-out;
+        }
+
+        .btn_t {
+            font-weight: bold;
+        }
+
+        @-webkit-keyframes in_t0 {
+            0% {
+                transform: translateX(-10px);
+                opacity: 0%;
+            }
+
+            100% {
+                opacity: 100%;
+                transform: translateX(0px);
+            }
+        }
+
+        @keyframes in_t0 {
+            0% {
+                transform: translateX(-10px);
+                opacity: 0%;
+            }
+
+            100% {
+                opacity: 100%;
+                transform: translateX(0px);
+            }
+        }
+
+        .title1 {
+            font-size: x-large;
+            align-content: center;
+        }
+
+        .title2 {
+            font-style: normal;
+            font-size: x-large;
+            font-weight: bold;
+            /*border-style: none solid none none;*/
+        }
+
+        .title_end {
+            -webkit-animation: in 1s ease-in-out;
+            animation: in 1s ease-in-out;
+            font-weight: bolder;
+        }
+
+        @-webkit-keyframes in_t {
+            0% {
+                transform: scale(0.5);
+            }
+
+            50% {
+                transform: scale(10)
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes in_t {
+            0% {
+                transform: scale(0.8);
+            }
+
+            50% {
+                transform: scale(10)
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+
+        .basic_mine {
+            width: 60px;
+            height: 60px;
+            border-style: double;
+            border-style: solid;
+            border-color: white;
+            border-radius: 15px;
+            float: left;
+        }
+
+        .mine_mouse_over:hover {
+            background: #769fb9;
+            background-blend-mode: soft-light;
+        }
+
+        .b0 {
+            background-color: #5a89b9;
+            -webkit-animation: in 0.5s ease-in-out;
+            animation: in 0.5s ease-in-out;
+        }
+
+        @-webkit-keyframes in {
+            0% {
+                transform: scale(0.5);
+            }
+
+            50% {
+                transform: scale(1.2)
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes in {
+            0% {
+                transform: scale(0.8);
+            }
+
+            50% {
+                transform: scale(1.1)
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .b1 {
+            background-color: antiquewhite;
+            text-align: center;
+            font-size: 40px;
+            font-weight: bold;
+            font-family: "Courier New";
+        }
+
+        .b1ani {
+            -webkit-animation: b1in 0.1s ease-out;
+            animation: b1in 0.1s ease-out;
+        }
+
+        @-webkit-keyframes b1in {
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes b1in {
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        .b2 {
+            background-color: coral;
+        }
+
+        .b3 {
+            background-color: brown;
+        }
+
+        .b4 {
+            background-color: crimson;
+            -webkit-animation: b1in 1s ease-in-out;
+            -webkit-animation-delay: 0.5s;
+            animation: b1in 1s ease-in-out;
+            animation-delay: 0.5s;
+        }
+
+        @-webkit-keyframes b4in {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(2)
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes b4in {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(2)
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="Vue_app">
+        <div style="border-style:solid none solid none; border-color: #5a89b9;">
+            <ul class="nav nav-pills" style="display:inline-block;">
+                <li class="title2"><a href="#" style="color: rgb(1, 32, 61);">扫雷</a></li>
+                <li v-if="Game_on" class="title1 title_ani"><a>雷数：{{boom_num}}</a></li>
+                <li v-if="Game_on" class="title1 title_ani"><a>级别：{{hard_lv[hard_lv_num]}}</a></li>
+                <li v-if="!Game_on" class="title1 title_ani"><a href="#" @click="Hard_cha()">
+                        <{{hard_lv[hard_lv_num]}}>
+                    </a>
+                </li>
+                <li v-if="!Game_on" class="title1 title_ani btn_t"><a href="#" @click="Begin()">开始>>></a></li>
+                <li v-if="Game_on" class="title1"><a class="title_ani">计时：{{Time_on+"s"}}</a></li>
+                <li v-if="vect_fg" class="title1 title_end"><a style="color: crimson">胜利！</a></li>
+                <li v-if="!vect_fg&&Game_set" class="title1 title_end"><a style="color: darkgreen">失败！</a></li>
+                <li v-if="Game_set" class="title1 title_ani btn_t" @click="Rst()"><a href="#">再来一局>>></a></li>
+                <li v-if="Game_on&&!Game_set" class="title1 btn_t"><a href="#" class="title_ani"
+                        @click="Rst()">重新开始>>></a></li>
+            </ul>
+        </div>
+        <div>
+            <div :style="{width: leni + 'px',height: lenj + 'px'}" v-if="Game_on">
+                <div v-for="(line,i) in out_map">
+                    <div v-for="(block,j) in line" v-bind:key="block[0]" @click.left="Left_clk(i,j)"
+                        @contextmenu.prevent="Right_clk(i,j)">
+                        <div v-if="block[1]==0" class="basic_mine b0 mine_mouse_over"></div>
+                        <div v-else-if="block[1]==1" class="basic_mine b1">
+                            <div class="b1ani">{{(boom_cnt_map[i][j]==0)?"":boom_cnt_map[i][j]}}</div>
+                        </div>
+                        <div v-else-if="block[1]==2" class="basic_mine b2"></div>
+                        <div v-else-if="block[1]==3" class="basic_mine b3"></div>
+                        <div v-else-if="block[1]==4" class="basic_mine b4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+        const vm = new Vue({
+            el: '#Vue_app',
+            data: {
+                Time_on: 0, //计时
+                Game_on: false, //游戏开始标志
+                Game_set: false,
+                interval: null, //计时器
+                boom_num_lst: [10, 40, 99, 999], //炸弹数
+                boom_num: 0,
+                map_num: [
+                    [9, 9],
+                    [16, 16],
+                    [16, 30],
+                    [64, 64]
+                ],
+                hard_lv: ["初级", "中级", "高级", "魔鬼"], //9*9-10 16*16-40 16*30-99 等级
+                hard_lv_num: 0, //等级编号
+                m: [
+                    [0, 1],
+                    [0, -1],
+                    [1, 0],
+                    [-1, 0],
+                    [1, 1],
+                    [-1, -1],
+                    [1, -1],
+                    [-1, 1]
+                ],
+                vect_fg: false,
+                //雷区
+                leni: 0,
+                lenj: 0,
+                blank_cnt: 0,
+                open_cnt: 0,
+                boom_map: [
+                    []
+                ], //false 非雷 true 雷
+                sweep_map: [
+                    []
+                ], //0未打开 1打开 2标记
+                boom_cnt_map: [
+                    []
+                ], //数字为一周雷数和
+                out_map: [
+                    []
+                ], //0未打开 1打开 非雷 （显示和）2标记 3雷 被点击 4雷 未被点击(游戏结束)
+
+            },
+            methods: {
+                Time_cnt: function () { //计时
+                    this.Time_on = 0;
+                    clearInterval(this.interval);
+                    this.interval = setInterval(() => {
+                        this.Time_on += 1
+                    }, 1000);
+                },
+                Hard_cha: function () { //循环选择难度
+                    this.hard_lv_num = (this.hard_lv_num + 1) % 4;
+                },
+                Boom_map_init_1: function () {
+                    let j;
+                    let i;
+                    var cnt = 0;
+                    this.blank_cnt = this.map_num[this.hard_lv_num][0] * this.map_num[this.hard_lv_num][1] -
+                        this.boom_num;
+                    for (i = 0; i < this.map_num[this.hard_lv_num][0]; ++i) {
+                        this.boom_map[i] = [];
+                        this.sweep_map[i] = [];
+                        this.boom_cnt_map[i] = [];
+                        this.out_map[i] = [];
+                        for (j = 0; j < this.map_num[this.hard_lv_num][1]; ++j) {
+                            this.boom_map[i][j] = false;
+                            this.sweep_map[i][j] = 0;
+                            this.boom_cnt_map[i][j] = 0;
+                            Vue.set(this.out_map[i], j, [cnt, 0]);
+                            cnt++;
+                            // Vue.set(this.out_map[i], j, ((j+i+i*j)%5));
+                        }
+                    }
+                },
+                Boom_map_init_2: function (i, j) {
+                    this.sweep_map[i][j] = 1;
+                    const d = new Date();
+                    for (let cnt = 0; cnt < this.boom_num;) { //地雷初始化
+                        if (d.getTime % 2)
+                            continue;
+                        var a = Math.ceil(Math.random() * 777 + d.getTime() + cnt * cnt) % this.map_num[this
+                            .hard_lv_num][0];
+                        var b = Math.ceil(Math.random() * 1777 + d.getTime() + cnt) % this.map_num[this
+                            .hard_lv_num][1];
+                        if (a != i && b != j && this.boom_map[a][b] == false) {
+                            this.boom_map[a][b] = true;
+                            // this.out_map[a][b]=4;
+                            ++cnt;
+                        }
+                    }
+                    var sum = 0;
+                    const m = [
+                        [0, 1],
+                        [0, -1],
+                        [1, 0],
+                        [-1, 0],
+                        [1, 1],
+                        [-1, -1],
+                        [1, -1],
+                        [-1, 1]
+                    ];
+                    for (let ii = 0; ii < this.map_num[this.hard_lv_num][0]; ++ii) {
+                        for (let jj = 0; jj < this.map_num[this.hard_lv_num][1]; ++jj) {
+                            sum = 0;
+                            for (let x = 0; x < 8; ++x) {
+                                if (ii + m[x][0] < this.map_num[this.hard_lv_num][0] && ii + m[x][0] >= 0 &&
+                                    jj + m[x][1] < this.map_num[this.hard_lv_num][1] && jj + m[x][1] >= 0) {
+                                    if (this.boom_map[ii + m[x][0]][jj + m[x][1]] == true)
+                                        sum++;
+                                }
+                            }
+                            if (this.boom_map[ii][jj])
+                                ++sum;
+                            // this.boom_cnt_map[ii][jj] = sum;
+                            Vue.set(this.boom_cnt_map[ii], jj, sum);
+                        }
+                    }
+                    Vue.set(this.out_map[i][j], 1, 1);
+                },
+                Begin: function () { //游戏开始
+                    this.Time_cnt(); //重置计时
+                    this.Game_on = true;
+                    this.boom_num = this.boom_num_lst[this.hard_lv_num];
+                    this.Boom_map_init_1();
+                    this.leni = this.map_num[this.hard_lv_num][1] * 60;
+                    this.lenj = this.map_num[this.hard_lv_num][0] * 60;
+                },
+                Rst: function () {
+                    this.Game_on = false;
+                    this.Game_set = false;
+                    clearInterval(this.interval);
+                    this.interval = null;
+                    this.boom_num = 0;
+                    this.leni = this.lenj = 0;
+                    this.blank_cnt = this.open_cnt = 0;
+                    this.vect_fg = false;
+                    this.Time_on = 0;
+                    // this.hard_lv_num = 0;
+                    this.boom_map = [
+                        []
+                    ];
+                    this.sweep_map = [
+                        []
+                    ];
+                    this.boom_cnt_map = [
+                        []
+                    ];
+                    this.out_map = [
+                        []
+                    ];
+                },
+                Game_over: function () {
+                    clearInterval(this.interval);
+                    this.Game_set = true;
+                    for (var i = 0; i < this.map_num[this.hard_lv_num][0]; ++i) {
+                        for (var j = 0; j < this.map_num[this.hard_lv_num][1]; ++j) {
+                            if (this.boom_map[i][j]) {
+                                Vue.set(this.out_map[i][j], 1, 4);
+                            }
+                        }
+                    }
+                },
+                Left_clk: function (i, j) {
+                    if (this.Game_set)
+                        return;
+                    ++this.open_cnt;
+                    if (this.open_cnt == 1) {
+                        this.Boom_map_init_2(i, j);
+                        if (this.boom_cnt_map[i][j] == 0) {
+                            Vue.set(this.out_map[i][j], 1, 1);
+                            Vue.set(this.sweep_map[i], j, 1);
+                            this.dfs(i, j);
+                        }
+                    } else if (this.out_map[i][j][1] == 0) {
+                        if (!this.boom_map[i][j]) {
+                            this.out_map[i][j][1] = 1;
+                        } else {
+                            this.Game_over();
+                            Vue.set(this.out_map[i][j], 1, 3);
+                        }
+                        if (this.boom_cnt_map[i][j] == 0) {
+                            Vue.set(this.out_map[i][j], 1, 1);
+                            Vue.set(this.sweep_map[i], j, 1);
+                            this.dfs(i, j);
+                        }
+                    }
+                    let sum = 0;
+                    for (let ii = 0; ii < this.map_num[this.hard_lv_num][0]; ++ii) {
+                        for (let jj = 0; jj < this.map_num[this.hard_lv_num][1]; ++jj) {
+                            if (this.out_map[ii][jj][1] == 1)
+                                ++sum;
+                        }
+                    }
+                    if (sum == this.blank_cnt) {
+                        this.Game_set = true;
+                        this.vect_fg = true;
+                        this.Game_over();
+                    }
+
+                },
+                dfs: function (i, j) {
+                    console.log(i, j);
+                    for (let x = 0; x < 8; ++x) {
+                        var ii = i + this.m[x][0];
+                        var jj = j + this.m[x][1];
+                        if (ii < this.map_num[this.hard_lv_num][0] && ii >= 0 && jj < this.map_num[this
+                                .hard_lv_num][1] && jj >= 0) {
+                            if (!this.boom_map[ii][jj] && this.out_map[ii][jj][1] == 0) {
+                                Vue.set(this.out_map[ii][jj], 1, 1);
+                                this.sweep_map[ii][jj] = 1;
+                                this.open_cnt++;
+                                if ((this.boom_cnt_map[ii][jj]) == 0) {
+                                    this.dfs(ii, jj);
+                                }
+                            }
+                        }
+                    }
+                },
+                Right_clk: function (i, j) {
+                    if (this.Game_set)
+                        return;
+                    if (this.out_map[i][j][1] == 0) {
+                        this.boom_num--;
+                        this.sweep_map[i][j] = 2;
+                        // this.out_map[i][j] = 2;
+                        Vue.set(this.out_map[i][j], 1, 2);
+                    } else if (this.out_map[i][j][1] == 2) {
+                        this.boom_num++;
+                        this.sweep_map[i][j] = 0;
+                        Vue.set(this.out_map[i][j], 1, 0);
+                    }
+                    let sum = 0;
+                    for (let ii = 0; ii < this.map_num[this.hard_lv_num][0]; ++ii) {
+                        for (let jj = 0; jj < this.map_num[this.hard_lv_num][1]; ++jj) {
+                            if (this.out_map[ii][jj][1] == 1)
+                                ++sum;
+                        }
+                    }
+                    if (sum == this.blank_cnt) {
+                        this.Game_set = true;
+                        this.vect_fg = true;
+                        this.Game_over();
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
